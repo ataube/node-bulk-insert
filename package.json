@@ -4,7 +4,7 @@
   "description": "Simple SQL generator for bulk insert statements",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/**/*.spec.js"
+    "test": "eslint . && mocha tests/**/*.spec.js"
   },
   "keywords": [
     "sql",
@@ -16,6 +16,9 @@
   "author": "Andreas Taube",
   "license": "MIT",
   "devDependencies": {
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-import": "^2.2.0",
     "mocha": "^3.2.0",
     "unexpected": "^10.21.1"
   }
