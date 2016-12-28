@@ -1,0 +1,22 @@
+{
+  "name": "bulk-insert",
+  "version": "1.0.0",
+  "description": "Simple SQL generator for bulk insert statements",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/**/*.spec.js"
+  },
+  "keywords": [
+    "sql",
+    "pg",
+    "insert",
+    "postgres",
+    "bulk"
+  ],
+  "author": "Andreas Taube",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "unexpected": "^10.21.1"
+  }
+}
