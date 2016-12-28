@@ -6,9 +6,22 @@ module.exports = function(table, values) {
   const isArray = Array.isArray(values);
   const fields = isArray && values.length > 0 ? 
     Object.keys(values[0]) : Object.keys(values);
-  const params = Object.values(values);
+  const params = isArray ? 
+    getParamsForArray(fields, values) : getParamsForObject(values);
   
-  const sql = `INSERT INTO ${table} (${fields.map(f => f)}) VALUES (${params.map((_,i) => `$${i + 1}`)});`
+  const sql = `INSERT INTO ${table} (${fields.map(f => f)}) VALUES ${params};`
   
   return sql;
+}
+
+function getParamsForObject(obj) {
+  return `(${Object.values(obj).map((_,i) => `$${i + 1}`)})`;
+}
+
+function getParamsForArray(fields, arr) {
+  return arr.reduce((memo) => {
+    const next = memo.length * fields.length + 1;
+    memo.push(`(${fields.map((_, i) => `$${i + next}`)})`);
+    return memo;
+  }, []);
 }
