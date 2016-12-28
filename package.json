@@ -1,5 +1,5 @@
 {
-  "name": "bulk-insert",
+  "name": "node-bulk-insert",
   "version": "1.0.0",
   "description": "Simple SQL generator for bulk insert statements",
   "main": "index.js",
