@@ -10,6 +10,10 @@ function getParamsForArray(arr, fields) {
   }, []);
 }
 
+const defaultOptions = {
+  return: '*',
+};
+
 /**
  * Generates a bulk insert SQL statement.
  * If a list of objects is given all of them must have the same structure.
@@ -18,17 +22,19 @@ function getParamsForArray(arr, fields) {
  * @param {Object|Array} values - a object or array of objects
  * @returns {string|null}
  */
-module.exports = function bulkInsert(table = '', values = []) {
-  if (!table || table === '') return null;
-  if (!values || values.length === 0) return null;
+module.exports = function bulkInsert(options = defaultOptions) {
+  return (table = '', values = []) => {
+    if (!table || table === '') return null;
+    if (!values || values.length === 0) return null;
 
-  const isArray = Array.isArray(values);
-  const fields = isArray ?
-    Object.keys(values[0]) : Object.keys(values);
-  const params = isArray ?
-    getParamsForArray(values, fields) : getParamsForObject(values);
+    const isArray = Array.isArray(values);
+    const fields = isArray ?
+      Object.keys(values[0]) : Object.keys(values);
+    const params = isArray ?
+      getParamsForArray(values, fields) : getParamsForObject(values);
 
-  const sql = `INSERT INTO ${table} (${fields.map(f => f)}) VALUES ${params};`;
+    const sql = `INSERT INTO ${table} (${fields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
 
-  return sql;
+    return sql;
+  };
 };
