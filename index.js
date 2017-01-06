@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const omit = require('lodash.omit');
 
 function getParamsForArray(arr, fields) {
@@ -18,6 +19,8 @@ const defaultOptions = {
   ignore: [],
 };
 
+const empty = () => ({ sql: null, values: [] });
+
 /**
  * Generates a bulk insert SQL statement.
  * If a list of objects is given all of them must have the same structure.
@@ -27,19 +30,27 @@ const defaultOptions = {
  * @returns {string|null}
  */
 module.exports = function bulkInsert(options) {
-  options = Object.assign({}, defaultOptions, options); // eslint-disable-line no-param-reassign
+  options = Object.assign({}, defaultOptions, options);
   return (table = '', values = []) => {
-    if (!table || table === '') return null;
-    if (!values || values.length === 0) return null;
+    if (!table || table === '') return empty();
+    if (!values || values.length === 0) return empty();
 
-    values = Array.isArray(values) ? values : [values]; // eslint-disable-line no-param-reassign
+    values = Array.isArray(values) ? values : [values];
 
     const filteredFields = Object.keys(omit(values[0], options.ignore));
+
+    if (filteredFields.length === 0) {
+      return empty();
+    }
+
     const filteredValues = filterValues(values, options.ignore);
     const params = getParamsForArray(filteredValues, filteredFields);
 
     const sql = `INSERT INTO ${table} (${filteredFields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
 
-    return sql;
+    return {
+      sql,
+      values: filteredValues,
+    };
   };
 };

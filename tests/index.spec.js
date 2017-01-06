@@ -28,29 +28,59 @@ describe('Bulk Insert Generator', () => {
       context: 'with ignore fields',
       input: ['myTable', { name: 'Ben', age: 20 }],
       options: { ignore: ['age'] },
-      expect: 'INSERT INTO myTable (name) VALUES ($1) RETURNING *;',
+      expect: {
+        sql: 'INSERT INTO myTable (name) VALUES ($1) RETURNING *;',
+        values: [{ name: 'Ben' }],
+      },
+    },
+    {
+      context: 'with ignore all fields',
+      input: ['myTable', { name: 'Ben', age: 20 }],
+      options: { ignore: ['age', 'name'] },
+      expect: {
+        sql: null,
+        values: [],
+      },
     },
     {
       context: 'with null arguments',
       input: [null, null],
-      expect: null,
+      expect: {
+        sql: null,
+        values: [],
+      },
     },
     {
       context: 'with empty values',
       input: ['myTable', []],
-      expect: null,
+      expect: {
+        sql: null,
+        values: [],
+      },
     },
     {
       context: 'with empty table name',
       input: ['', [{ name: 'Ben' }]],
-      expect: null,
+      expect: {
+        sql: null,
+        values: [],
+      },
     },
   ].forEach((spec) => {
     context(spec.context, () => {
-      it(spec.expect || 'returns null', () => {
+      it(spec.expect.sql || 'returns null', () => {
+        const inputValues = spec.input[1];
         const bulkInsert = BulkInsert(spec.options);
-        const sql = bulkInsert(...spec.input);
-        expect(sql, 'to equal', spec.expect);
+        const result = bulkInsert(...spec.input);
+
+        function resolveExpectation(e) {
+          if (typeof e === 'object') return e;
+          return {
+            sql: e,
+            values: Array.isArray(inputValues) ? inputValues : [inputValues],
+          };
+        }
+        expect(result, 'to satisfy', resolveExpectation(spec.expect));
       });
     });
   });
