@@ -6,23 +6,35 @@ describe('Bulk Insert Generator', () => {
     {
       context: 'with simple object',
       input: ['myTable', { name: 'Ben', age: 20 }],
-      expect: 'INSERT INTO myTable (name,age) VALUES ($1,$2) RETURNING *;',
+      expect: {
+        sql: 'INSERT INTO myTable (name,age) VALUES ($1,$2) RETURNING *;',
+        values: ['Ben', 20],
+      },
     },
     {
       context: 'with simple object 2',
       input: ['myTable', { name: 'Ben', age: 20, city: 'Hamburg', country: 'Germany' }],
-      expect: 'INSERT INTO myTable (name,age,city,country) VALUES ($1,$2,$3,$4) RETURNING *;',
+      expect: {
+        sql: 'INSERT INTO myTable (name,age,city,country) VALUES ($1,$2,$3,$4) RETURNING *;',
+        values: ['Ben', 20, 'Hamburg', 'Germany'],
+      },
     },
     {
       context: 'with array of objects',
       input: ['myTable', [{ name: 'Ben', age: 20 }, { name: 'Michael', age: 30 }]],
-      expect: 'INSERT INTO myTable (name,age) VALUES ($1,$2),($3,$4) RETURNING *;',
+      expect: {
+        sql: 'INSERT INTO myTable (name,age) VALUES ($1,$2),($3,$4) RETURNING *;',
+        values: ['Ben', 20, 'Michael', 30],
+      },
     },
     {
       context: 'with custom return option',
       input: ['myTable', { name: 'Ben', age: 20 }],
       options: { return: 'id' },
-      expect: 'INSERT INTO myTable (name,age) VALUES ($1,$2) RETURNING id;',
+      expect: {
+        sql: 'INSERT INTO myTable (name,age) VALUES ($1,$2) RETURNING id;',
+        values: ['Ben', 20],
+      },
     },
     {
       context: 'with ignore fields',
@@ -30,7 +42,7 @@ describe('Bulk Insert Generator', () => {
       options: { ignore: ['age'] },
       expect: {
         sql: 'INSERT INTO myTable (name) VALUES ($1) RETURNING *;',
-        values: [{ name: 'Ben' }],
+        values: ['Ben'],
       },
     },
     {
@@ -69,18 +81,10 @@ describe('Bulk Insert Generator', () => {
   ].forEach((spec) => {
     context(spec.context, () => {
       it(spec.expect.sql || 'returns null', () => {
-        const inputValues = spec.input[1];
         const bulkInsert = BulkInsert(spec.options);
         const result = bulkInsert(...spec.input);
 
-        function resolveExpectation(e) {
-          if (typeof e === 'object') return e;
-          return {
-            sql: e,
-            values: Array.isArray(inputValues) ? inputValues : [inputValues],
-          };
-        }
-        expect(result, 'to satisfy', resolveExpectation(spec.expect));
+        expect(result, 'to satisfy', spec.expect);
       });
     });
   });

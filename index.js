@@ -14,12 +14,15 @@ function filterValues(values, ignoredFields = []) {
   return values.map(v => omit(v, ignoredFields));
 }
 
+const empty = () => ({ sql: null, values: [] });
+
+const flattenValues = values => values.reduce((memo, val) =>
+    [...memo, ...Object.values(val)], []); // convert [{a: 1, b:2}] => [1, 2]
+
 const defaultOptions = {
   return: '*',
   ignore: [],
 };
-
-const empty = () => ({ sql: null, values: [] });
 
 /**
  * Generates a bulk insert SQL statement.
@@ -50,7 +53,7 @@ module.exports = function bulkInsert(options) {
 
     return {
       sql,
-      values: filteredValues,
+      values: flattenValues(filteredValues),
     };
   };
 };
