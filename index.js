@@ -8,10 +8,9 @@ function getParamsForArray(arr, fields) {
   }, []);
 }
 
-function filterValues(values = [], ignoredFields) {
-  const foo = values.map(v => omit(v, ignoredFields));
-  console.log('>>>>', foo)
-  return foo;
+function filterValues(values, ignoredFields = []) {
+  if (!values) return null;
+  return values.map(v => omit(v, ignoredFields));
 }
 
 const defaultOptions = {
@@ -34,12 +33,12 @@ module.exports = function bulkInsert(options) {
     if (!values || values.length === 0) return null;
 
     values = Array.isArray(values) ? values : [values]; // eslint-disable-line no-param-reassign
-    const fields = Object.keys(values[0]);
-    const filteredValues = options.ignore.length > 0 ?
-      filterValues(values, options.ignore) : values;
-    const params = getParamsForArray(filteredValues, fields, options);
 
-    const sql = `INSERT INTO ${table} (${fields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
+    const filteredFields = Object.keys(omit(values[0], options.ignore));
+    const filteredValues = filterValues(values, options.ignore);
+    const params = getParamsForArray(filteredValues, filteredFields);
+
+    const sql = `INSERT INTO ${table} (${filteredFields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
 
     return sql;
   };
