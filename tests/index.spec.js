@@ -25,6 +25,12 @@ describe('Bulk Insert Generator', () => {
       expect: 'INSERT INTO myTable (name,age) VALUES ($1,$2) RETURNING id;',
     },
     {
+      context: 'with ignore fields',
+      input: ['myTable', { name: 'Ben', age: 20 }],
+      options: { ignore: ['age'] },
+      expect: 'INSERT INTO myTable (name) VALUES ($1) RETURNING *;',
+    },
+    {
       context: 'with null arguments',
       input: [null, null],
       expect: null,

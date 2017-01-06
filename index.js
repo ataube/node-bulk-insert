@@ -1,6 +1,4 @@
-function getParamsForObject(obj) {
-  return `(${Object.values(obj).map((_, i) => `$${i + 1}`)})`;
-}
+const omit = require('lodash.omit');
 
 function getParamsForArray(arr, fields) {
   return arr.reduce((memo) => {
@@ -10,8 +8,15 @@ function getParamsForArray(arr, fields) {
   }, []);
 }
 
+function filterValues(values = [], ignoredFields) {
+  const foo = values.map(v => omit(v, ignoredFields));
+  console.log('>>>>', foo)
+  return foo;
+}
+
 const defaultOptions = {
   return: '*',
+  ignore: [],
 };
 
 /**
@@ -22,16 +27,17 @@ const defaultOptions = {
  * @param {Object|Array} values - a object or array of objects
  * @returns {string|null}
  */
-module.exports = function bulkInsert(options = defaultOptions) {
+module.exports = function bulkInsert(options) {
+  options = Object.assign({}, defaultOptions, options); // eslint-disable-line no-param-reassign
   return (table = '', values = []) => {
     if (!table || table === '') return null;
     if (!values || values.length === 0) return null;
 
-    const isArray = Array.isArray(values);
-    const fields = isArray ?
-      Object.keys(values[0]) : Object.keys(values);
-    const params = isArray ?
-      getParamsForArray(values, fields) : getParamsForObject(values);
+    values = Array.isArray(values) ? values : [values]; // eslint-disable-line no-param-reassign
+    const fields = Object.keys(values[0]);
+    const filteredValues = options.ignore.length > 0 ?
+      filterValues(values, options.ignore) : values;
+    const params = getParamsForArray(filteredValues, fields, options);
 
     const sql = `INSERT INTO ${table} (${fields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
 
