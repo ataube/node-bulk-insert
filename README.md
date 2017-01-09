@@ -9,22 +9,21 @@ Works nicely with [node-postgres](https://github.com/brianc/node-postgres).
 ## Usage
 ### Simple
 ```javascript
-const BulkInsert = require('@ataube/bulk-insert');
-const bulkInsert = BulkInsert();
+const bulkInsert = require('node-bulk-insert');
 const values = [{ name: 'Ben', age: 20 }, { name: 'Michael', age: 30 }]];
 
-const { sql } bulkInsert('myTable', values);
+const { sql } = bulkInsert('myTable', values);
 
 // INSERT INTO myTable (name,age) VALUES ($1,$2),($3,$4) RETURNING *;
 ```
 
 ### Ignore Fields
 ```javascript
-const BulkInsert = require('@ataube/bulk-insert');
-const bulkInsert = BulkInsert(ignore: ['age'] });
+const bulkInsert = require('node-bulk-insert');
+const options = { ignore: ['age'] };
 const values = [{ name: 'Ben', age: 20 }, { name: 'Michael', age: 30 }]];
 
-const { sql, values } bulkInsert('myTable', values);
+const { sql, values } = bulkInsert('myTable', values, options);
 
 // sql: INSERT INTO myTable (name) VALUES ($1),($2) RETURNING *;
 // values: ['Ben', 'Michael']

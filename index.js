@@ -32,28 +32,26 @@ const defaultOptions = {
  * @param {Object|Array} values - a object or array of objects
  * @returns {string|null}
  */
-module.exports = function bulkInsert(options) {
+module.exports = function bulkInsert(table = '', values = [], options) {
   options = Object.assign({}, defaultOptions, options);
-  return (table = '', values = []) => {
-    if (!table || table === '') return empty();
-    if (!values || values.length === 0) return empty();
+  if (!table || table === '') return empty();
+  if (!values || values.length === 0) return empty();
 
-    values = Array.isArray(values) ? values : [values];
+  values = Array.isArray(values) ? values : [values];
 
-    const filteredFields = Object.keys(omit(values[0], options.ignore));
+  const filteredFields = Object.keys(omit(values[0], options.ignore));
 
-    if (filteredFields.length === 0) {
-      return empty();
-    }
+  if (filteredFields.length === 0) {
+    return empty();
+  }
 
-    const filteredValues = filterValues(values, options.ignore);
-    const params = getParamsForArray(filteredValues, filteredFields);
+  const filteredValues = filterValues(values, options.ignore);
+  const params = getParamsForArray(filteredValues, filteredFields);
 
-    const sql = `INSERT INTO ${table} (${filteredFields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
+  const sql = `INSERT INTO ${table} (${filteredFields.map(f => f)}) VALUES ${params} RETURNING ${options.return};`;
 
-    return {
-      sql,
-      values: flattenValues(filteredValues),
-    };
+  return {
+    sql,
+    values: flattenValues(filteredValues),
   };
 };

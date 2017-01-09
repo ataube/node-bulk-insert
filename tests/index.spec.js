@@ -1,5 +1,5 @@
 const expect = require('unexpected');
-const BulkInsert = require('..');
+const bulkInsert = require('..');
 
 describe('Bulk Insert Generator', () => {
   [
@@ -81,8 +81,7 @@ describe('Bulk Insert Generator', () => {
   ].forEach((spec) => {
     context(spec.context, () => {
       it(spec.expect.sql || 'returns null', () => {
-        const bulkInsert = BulkInsert(spec.options);
-        const result = bulkInsert(...spec.input);
+        const result = bulkInsert.apply(this, [...spec.input, spec.options]);
 
         expect(result, 'to satisfy', spec.expect);
       });
